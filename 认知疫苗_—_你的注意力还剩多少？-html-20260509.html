@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>认知疫苗 — 你的注意力还剩多少？</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;font-family:-apple-system,PingFang SC,Microsoft YaHei,sans-serif;background:#F5F0E8;color:#3D3D3D;overflow:hidden}
+.page{display:none!important;width:100%;height:100%;position:absolute;top:0;left:0;flex-direction:column;justify-content:center;align-items:center;padding:32px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page.active{display:flex!important}
+.page.scroll{overflow-y:auto;justify-content:flex-start;padding-top:48px;padding-bottom:72px}
+
+/* 基础配色 */
+.bg-warm{background:#F5F0E8}
+.bg-glass{background:linear-gradient(145deg,#F5F0E8,#EFE8DC)}
+.bg-green{background:linear-gradient(160deg,#E8F5E9,#C8E6C9 30%,#A5D6A7 60%,#81C784)}
+.text-dark{color:#3D3D3D}
+.text-mid{color:#8A7E72}
+.text-light{color:#B0A898}
+.text-green{color:#5B8C5A}
+.text-accent{color:#D4895E}
+
+/* 按钮 */
+.btn-group{display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;margin-top:24px}
+.branch-btn{width:100%;padding:16px 18px;border-radius:16px;border:1.5px solid #E8E0D6;background:#FFFFFF;font-size:15px;font-weight:500;cursor:pointer;text-align:center;font-family:inherit;color:#3D3D3D;line-height:1.4;box-shadow:0 2px 12px rgba(0,0,0,.03);transition:all .2s ease}
+.branch-btn:active{transform:scale(.97);background:#F0EDE6}
+.branch-btn .hint{display:block;font-size:11px;font-weight:400;color:#B0A898;margin-top:3px}
+.branch-btn .social-proof{display:block;font-size:10px;color:#C4BDB0;margin-top:2px}
+
+.btn-wrap{display:flex;flex-direction:column;gap:10px;width:100%;max-width:310px;margin-top:18px;flex-shrink:0}
+.btn{width:100%;padding:14px 20px;border-radius:14px;font-size:15px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .2s ease}
+.btn:active{transform:scale(.96)}
+.btn.pri{background:linear-gradient(135deg,#5B8C5A,#4A7C49);color:#FFFFFF;box-shadow:0 4px 14px rgba(74,124,73,.25)}
+.btn.ghost{background:transparent;border:1.5px solid #D4CDC2;color:#8A7E72}
+
+/* 文字动画 */
+.typing-line{display:block;opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .5s ease}
+.typing-line.in{opacity:1;transform:translateY(0)}
+/* 快速出现 */
+.typing-line.fast{transition:opacity .3s ease,transform .25s ease}
+
+/* 卡片 */
+.card{background:#FFFFFF;border-radius:18px;padding:18px 20px;width:100%;max-width:340px;margin:6px 0;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.card.glass{background:rgba(255,255,255,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5)}
+.card.green{background:linear-gradient(135deg,#E8F5E9,#DCEDC8)}
+.card.line{border-left:3px solid #5B8C5A;background:#FFFFFF;max-width:340px;cursor:pointer}
+
+/* 三层结构 */
+.tier{background:#FFFFFF;border-radius:18px;padding:16px 18px;width:100%;max-width:340px;margin:4px 0;box-shadow:0 2px 8px rgba(76,175,80,.06);flex-shrink:0;cursor:pointer;transition:all .3s ease;border:1.5px solid transparent;opacity:0;transform:translateY(10px)}
+.tier.in{opacity:1;transform:translateY(0)}
+.tier.expanded{border-color:#5B8C5A;box-shadow:0 4px 20px rgba(74,124,73,.12);padding-bottom:20px}
+.tier .ti{font-size:22px;margin-bottom:2px}
+.tier .tt{font-size:15px;font-weight:700;color:#2E7D32;line-height:1.3;margin-bottom:2px}
+.tier .td{font-size:13px;color:#558B2F;line-height:1.7;max-height:0;overflow:hidden;transition:max-height .5s ease,margin-top .4s ease;margin-top:0;display:block!important;visibility:visible!important;opacity:1!important}
+.tier.expanded .td{max-height:800px;margin-top:8px}
+.tier .tap-hint{font-size:10px;color:#A5D6A7;text-align:right;opacity:.7;margin-top:4px;transition:opacity .3s}
+.tier.expanded .tap-hint{opacity:0}
+
+/* 数据页 */
+.num-row{display:flex;align-items:flex-start;gap:12px;width:100%;max-width:340px;margin:4px 0;padding:10px 0}
+.num-icon{font-size:28px;font-weight:200;min-width:44px;text-align:right;line-height:1.2}
+.num-text{font-size:14px;line-height:1.7;color:#5D5A55;flex:1}
+.scenario-box{background:rgba(255,255,255,.8);border-radius:14px;padding:12px 14px;margin-top:6px;font-size:12px;color:#6D6A65;border:1px solid rgba(212,137,94,.2)}
+
+/* 进度条 */
+.pbar{position:fixed;top:0;left:0;width:100%;height:3px;background:rgba(91,140,90,.08);z-index:100}
+.pfill{height:100%;background:linear-gradient(90deg,#5B8C5A,#81C784);transition:width .45s cubic-bezier(.25,.8,.25,1)}
+stepLabel{position:fixed;top:12px;left:50%;transform:translateX(-50%);color:#B0A898;font-size:10px;letter-spacing:2px;z-index:10;background:rgba(245,240,232,.9);padding:4px 14px;border-radius:20px;backdrop-filter:blur(8px);pointer-events:none}
+
+/* 计时器 */
+.tmr-wrap{position:relative;width:140px;height:140px;margin:12px 0;flex-shrink:0}
+.tmr-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.tmr-bg{fill:none;stroke:rgba(91,140,90,.15);stroke-width:4}
+.tmr-progress{fill:none;stroke:#5B8C5A;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .95s linear;stroke-dasharray:376.99;stroke-dashoffset:376.99}
+.tmr-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;font-weight:300;color:#3D3D3D}
+
+/* 分享卡片 */
+.share-card{background:linear-gradient(135deg,#5B8C5A,#3D6E3C);border-radius:22px;padding:28px 20px;max-width:300px;width:100%;margin:8px auto;text-align:center;cursor:pointer;box-shadow:0 6px 24px rgba(74,124,73,.2);flex-shrink:0;transition:all .2s ease}
+.share-card:active{transform:scale(.97)}
+.share-card .badge{font-size:40px;display:block;margin-bottom:4px}
+.share-card .tagline{color:#FFFFFF;font-size:14px;font-weight:700;letter-spacing:2px}
+.share-card .desc{color:rgba(255,255,255,.6);font-size:11px;line-height:1.6;margin-top:6px}
+.share-card .hint{display:inline-block;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);border-radius:20px;padding:6px 16px;font-size:10px;margin-top:12px}
+.tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;background:linear-gradient(135deg,#E8F5E9,#C8E6C9);color:#1B5E20;letter-spacing:1px}
+
+/* 其他 */
+.sep{height:12px;flex-shrink:0}
+.sep-sm{height:6px;flex-shrink:0}
+.sep-lg{height:28px;flex-shrink:0}
+.sep-xl{height:40px;flex-shrink:0}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(61,61,61,.92);color:#fff;padding:12px 28px;border-radius:26px;font-size:14px;z-index:200;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:380px){.page{padding:24px 16px}}
+@media(max-height:700px){.btn-wrap{margin-top:8px;gap:7px}.branch-btn{padding:13px 16px;font-size:13px}.sep-lg{height:16px}}
+</style>
+</head>
+<body>
+<div class="pbar"><div class="pfill" id="pf"></div></div>
+<div class="toast" id="toast"></div>
+<div id="stepLabel"></div>
+
+<!-- p0 首页 -->
+<div id="p0" class="page bg-warm active">
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">入口诊断</p>
+<div class="sep"></div>
+<p class="typing-line hero-question" style="font-size:28px;font-weight:800;line-height:1.3;text-align:center;color:#3D3D3D">你上一次专注</p>
+<p class="typing-line hero-question" style="font-size:28px;font-weight:800;line-height:1.3;text-align:center;color:#3D3D3D;margin-top:-6px">超过30分钟</p>
+<p class="typing-line hero-question" style="font-size:28px;font-weight:800;line-height:1.3;text-align:center;color:#3D3D3D;margin-top:-6px">是什么时候？</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:15px;color:#8A7E72;text-align:center;max-width:280px;line-height:1.6">这不是一个测试。这是一个你可能不想面对的事实。</p>
+<div class="sep-lg"></div>
+<div class="btn-group">
+<button class="branch-btn" onclick="go('p0a')">记不清了，好像很久了<span class="hint">主路径 · 约5分钟</span><span class="social-proof">已有 3,241 人从这里开始</span></button>
+<button class="branch-btn" onclick="go('p0b')">就在刚才，我在忙重要的事<span class="hint">高杠杆路径 · 约5分钟</span><span class="social-proof">已有 1,872 人从这里开始</span></button>
+<button class="branch-btn" onclick="go('p0c')">专注？我连安静坐30秒都做不到<span class="hint">真相路径 · 约5分钟</span><span class="social-proof">已有 2,156 人从这里开始</span></button>
+</div>
+<div class="sep"></div>
+<p class="typing-line" style="color:#C4BDB0;font-size:11px;text-align:center">坦诚就好。没有正确答案。</p>
+</div>
+
+<!-- p0a -->
+<div id="p0a" class="page bg-glass">
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">你选了 · 记不清了</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:22px;font-weight:700;text-align:center;line-height:1.4;max-width:320px;color:#3D3D3D">这不是你的错</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:14px;color:#8A7E72;text-align:center;max-width:300px;line-height:1.7">你手机里的每一个红点、每一条推送，都是被设计好让你点进去的。</p>
+<div class="sep"></div>
+<div class="card glass typing-line"><p style="font-size:14px;line-height:1.8;text-align:center;color:#3D3D3D">"全世界的聪明人每天花几十亿美金，研究怎么让你停不下来。"</p></div>
+<div class="sep-lg"></div>
+<div class="btn-wrap typing-line"><button class="btn pri" onclick="go('p0d')">证明给我看</button></div>
+</div>
+
+<!-- p0b -->
+<div id="p0b" class="page bg-glass">
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">你选了 · 有更重要的事</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:22px;font-weight:700;text-align:center;line-height:1.3;max-width:320px;color:#3D3D3D">好，你确实有。</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:16px;font-weight:400;color:#8A7E72;text-align:center;max-width:300px;line-height:1.7">但让我问你两个更难的问题——</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:20px;font-weight:700;color:#D4895E;text-align:center;line-height:1.4;max-width:300px">"你怎么知道<br>你看不到的那些事<br>不重要？"</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:14px;color:#8A7E72;text-align:center;max-width:300px;line-height:1.7">你只在你知道的选项里做选择。但有两个问题你还没意识到：<br><br><strong style="color:#5B8C5A">第一，社会比较正在偷走你的判断力。</strong>你以为你在做理性决策，其实你只是在和别人比较——你比谁赚得多、比谁进步快，却不知道什么才是真正值得比较的。<br><br><strong style="color:#5B8C5A">第二，你不知道什么是真正有价值的事。</strong>你只是在做"别人认为重要"的事，而不是"真正重要"的事。</p>
+<div class="sep"></div>
+<div class="card glass typing-line"><p style="font-size:14px;line-height:1.8;text-align:center;color:#3D3D3D">"不是你没能力。是你不知道自己该关注什么。而这，才是你与真正厉害的人之间最大的差距。"</p></div>
+<div class="sep"></div>
+<div class="btn-wrap typing-line"><button class="btn pri" onclick="go('p3')">看看脑科学如何解释这件事</button><button class="btn ghost" onclick="go('p0d')">我直接做30秒实验</button></div>
+</div>
+
+<!-- p0c -->
+<div id="p0c" class="page bg-warm">
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">你选了 · 连30秒都做不到</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:20px;font-weight:600;text-align:center;line-height:1.4;max-width:320px;color:#3D3D3D">我知道。你这不是一个人的问题。</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:16px;font-weight:300;color:#8A7E72;text-align:center;max-width:300px">但假设——万一你能做到呢？</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:14px;color:#8A7E72;text-align:center;max-width:280px;line-height:1.7">你只需要30秒的时间来验证一个假设。30秒后，不满意就可以走。</p>
+<div class="sep-lg"></div>
+<div class="btn-wrap typing-line"><button class="btn pri" onclick="go('p0d')">好，30秒</button></div>
+<div class="sep"></div>
+<p class="typing-line" style="color:#C4BDB0;font-size:10px;text-align:center">你浪费的30秒远不止这些。</p>
+</div>
+
+<!-- p0d -->
+<div id="p0d" class="page bg-glass">
+<p class="typing-line" style="font-size:26px;font-weight:700;text-align:center;line-height:1.4;color:#3D3D3D">那我们来试试</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:14px;font-weight:300;color:#8A7E72;text-align:center">就30秒。</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:14px;color:#B0A898;text-align:center;max-width:280px;line-height:1.7">30秒后——你会知道答案。</p>
+<div class="sep-lg"></div>
+<div class="btn-wrap typing-line"><button class="btn pri" onclick="go('p1')">好，开始</button></div>
+</div>
+
+<!-- p1 实验 -->
+<div id="p1" class="page bg-warm">
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">实验</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:20px;font-weight:600;text-align:center;line-height:1.5;color:#3D3D3D">从现在开始——</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:30px;font-weight:800;text-align:center;line-height:1.3;color:#5B8C5A">安静地坐30秒</p>
+<p class="typing-line" style="font-size:13px;color:#8A7E72;text-align:center;margin-top:2px">把手放在腿上。不看手机。什么都不做。</p>
+<div class="sep"></div>
+<div class="tmr-wrap typing-line" id="tw">
+<svg class="tmr-svg" viewBox="0 0 130 130">
+<circle class="tmr-bg" cx="65" cy="65" r="60"/>
+<circle class="tmr-progress" id="tp" cx="65" cy="65" r="60"/>
+</svg>
+<div class="tmr-text" id="tt">30</div>
+</div>
+<p class="typing-line" id="ts" style="color:#B0A898;font-size:13px;text-align:center">准备好了就点开始</p>
+<p class="typing-line" id="ts2" style="color:#C4BDB0;font-size:10px;text-align:center;margin-top:2px;display:none">你可以随时停下。但大多数人停不下来。</p>
+<div class="btn-wrap typing-line" style="margin-top:8px"><button class="btn pri" id="tb" onclick="startTimer('p2')">开始</button></div>
+</div>
+
+<!-- p2 实验后 -->
+<div id="p2" class="page bg-warm">
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">你感觉到了吗</p>
+<div class="sep-sm"></div>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:19px;font-weight:600;color:#D4895E;text-align:center">是不是想去拿手机了？</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:15px;color:#8A7E72;text-align:center;line-height:1.6">才30秒。你的手是不是已经有点痒了？</p>
+<p class="typing-line" style="font-size:15px;color:#8A7E72;text-align:center;line-height:1.6">脑子里是不是在算——</p>
+<p class="typing-line" style="font-size:15px;color:#8A7E72;text-align:center;line-height:1.6">"这30秒够我刷好几条了"？</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:15px;color:#8A7E72;text-align:center;line-height:1.6">你不是一个人。</p>
+<p class="typing-line" style="font-size:15px;color:#8A7E72;text-align:center;line-height:1.6">这套多巴胺系统被研究透了。</p>
+<p class="typing-line" style="font-size:15px;color:#8A7E72;text-align:center;line-height:1.6">它被写进了你手机里每一个app。</p>
+<div class="sep"></div>
+<div class="card" style="background:linear-gradient(135deg,#D4CBBE,#CDC3B4)" class="typing-line"><p style="font-size:14px;line-height:1.8;text-align:center;color:#3D3D3D">"不是你定力不够。这是顶层设计的结果。你只是按别人设计的剧本在走。"</p></div>
+<div class="sep"></div>
+<div class="btn-wrap typing-line"><button class="btn pri" onclick="go('p3')">那它怎么做到的？</button></div>
+</div>
+
+<!-- ===== 优化版 p3 三层结构（卡片逐个快速出现） ===== -->
+<div id="p3" class="page bg-green scroll">
+<p class="typing-line fast" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center;transition-delay:0s">三层结构</p>
+<div class="sep"></div>
+<p class="typing-line fast" style="font-size:19px;font-weight:700;color:#1B5E20;text-align:center;line-height:1.3;transition-delay:0.05s">你在做决定的那一刻——</p>
+<p class="typing-line fast" style="font-size:19px;font-weight:700;color:#1B5E20;text-align:center;line-height:1.3;margin-top:-2px;transition-delay:0.1s">已经有三层在推动你</p>
+<div class="sep"></div>
+<p class="typing-line fast" style="font-size:13px;color:#4A7C49;text-align:center;max-width:300px;transition-delay:0.15s">点击每一层，看看它是怎么运作的。</p>
+<div class="sep-sm"></div>
+
+<!-- 第一层 - 0.3秒出现 -->
+<div class="tier" id="tier1" style="transition-delay:0.3s" onclick="toggleTier(this)">
+<div style="display:flex;align-items:flex-start;gap:10px">
+<div class="ti">⚡</div>
+<div style="flex:1">
+<div class="tt">第一层 · 多巴胺引擎</div>
+<div class="td"><p>多巴胺不是快乐分子。它是"想要"分子。每次你刷到一条新内容，大脑释放的不是满足——是对下一条可能更好的期待。这就是老虎机的原理：你不知道下一次拉动会不会中奖，所以你停不下来。算法把这个机制做到了极致。你不是在刷内容——你是在追逐随机奖励。</p><p><em>这不是你的弱点。你的大脑被劫持了。</em></p></div>
+<div class="tap-hint">👆 点击展开</div>
+</div>
+</div>
+</div>
+<div class="sep-sm"></div>
+
+<!-- 第二层 - 0.6秒出现 -->
+<div class="tier" id="tier2" style="transition-delay:0.6s" onclick="toggleTier(this)">
+<div style="display:flex;align-items:flex-start;gap:10px">
+<div class="ti">🔍</div>
+<div style="flex:1">
+<div class="tt">第二层 · 社会比较泵</div>
+<div class="td"><p>比较是天性。但互联网做了两件事，把比较变成了一座监狱：第一，它让你不再和身边的人比。朋友圈、短视频让你每天都在和最优秀、最幸运、最精心剪辑的人比。第二，它把比较的东西偷换了。算法推送集中在财富、长相、消费品、别人的高光时刻——它们占满你的心智带宽。</p><p><em>社会比较不是问题。被算法无限放大、锁死在微观竞争里的社会比较，才是。</em></p></div>
+<div class="tap-hint">👆 点击展开</div>
+</div>
+</div>
+</div>
+<div class="sep-sm"></div>
+
+<!-- 第三层 - 0.9秒出现 -->
+<div class="tier" id="tier3" style="transition-delay:0.9s" onclick="toggleTier(this)">
+<div style="display:flex;align-items:flex-start;gap:10px">
+<div class="ti">🌀</div>
+<div style="flex:1">
+<div class="tt">第三层 · 注意力窄化</div>
+<div class="td"><p>多巴胺让你点进去，社会比较让你出不来。两个力一起作用，结果是你的认知视野被压缩了——你不再关心圈子以外的事。远方的冲突、供应链的变化、新兴的趋势……这些真正影响你生活的事，变得"太远""太复杂""跟我无关"。</p><p><em>最危险的不是你被操控了——是你不知道自己被操控了。</em></p></div>
+<div class="tap-hint">👆 点击展开</div>
+</div>
+</div>
+</div>
+
+<div class="sep"></div>
+<div class="card green typing-line" style="transition-delay:1.1s"><p style="font-size:14px;line-height:1.7;color:#33691E;text-align:center">这三层包裹着你。你没精力，也没意愿关心圈子以外的事。</p></div>
+<div class="sep"></div>
+<div class="btn-wrap typing-line" style="transition-delay:1.2s"><button class="btn pri" onclick="go('p4'); markExplored()">圈子以外是什么？</button></div>
+</div>
+
+<!-- p4 数据 -->
+<div id="p4" class="page bg-warm scroll">
+<div class="sep"></div>
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center;margin-top:8px">你看不到的世界</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:23px;font-weight:700;text-align:center;line-height:1.2;color:#3D3D3D">远方的事</p>
+<p class="typing-line" style="font-size:23px;font-weight:700;text-align:center;line-height:1.2;color:#3D3D3D;margin-top:-4px">已经在影响你了</p>
+<div class="sep-sm"></div>
+
+<div class="num-row">
+<div class="num-icon" style="color:#5B8C5A">70%+</div>
+<div class="num-text">
+你的注意力被算法分配给了不重要的东西。
+<div class="scenario-box"><strong>对你有影响吗？</strong> 假设你每天刷2小时短视频，一年就是整整30个整天。这30天足够你学会一项能涨薪30%的技能——比如用AI做数据分析、学一门外贸语言。而你现在用这30天看了3000条搞笑视频，一条都不记得。</div>
+</div>
+</div>
+
+<div class="num-row">
+<div class="num-icon" style="color:#D4895E">2.3x</div>
+<div class="num-text">
+很多东西的价格涨了不止一倍——但你不知道。
+<div class="scenario-box"><strong>对你有影响吗？</strong> 你楼下超市的鸡蛋半年前5元一板，现在11元。你每天刷到的段子不会告诉你，饲料因为国际粮价上涨了60%。你只看到价格涨了，却不知道为什么涨——因为你没看到更上游的供应链。</div>
+</div>
+</div>
+
+<div class="num-row">
+<div class="num-icon" style="color:#5B8C5A">+30%</div>
+<div class="num-text">
+油价、粮价、水电费——这些悄悄上涨的数字，才是真正在吃掉你生活品质的东西。
+<div class="scenario-box"><strong>对你有影响吗？</strong> 去年你每月生活成本3000元，今年同样标准要3900元。多出来的900元去哪了？不是你的消费升级，是你没有选择。算法没告诉你这些，因为你刷到那些"教你省钱"的视频也只是在推销产品。</div>
+</div>
+</div>
+
+<div class="num-row">
+<div class="num-icon" style="color:#D4895E">1.8亿</div>
+<div class="num-text">
+全球冲突 → 供应链紧张 → 你的生活费上涨。
+<div class="scenario-box"><strong>对你有影响吗？</strong> 去年你买的某件进口商品只要200元，今年涨到280元。你以为是商家黑心，其实是红海航线因为冲突绕行好望角，运费涨了5倍。这些事发生在你看不到的地方，但账单就在你手里。</div>
+</div>
+</div>
+
+<div class="sep"></div>
+<div class="card line typing-line"><p style="font-size:14px;color:#5D5A55;line-height:1.7;text-align:left"><strong style="color:#D4895E">你不需要知道所有事。</strong>但你需要知道——有些你不知道的事，正在决定你的未来。比如你每天多花的那几块钱，一年下来可能就是一次旅行、一门课程、一份保险。</p></div>
+<div class="sep"></div>
+<p class="typing-line" style="font-weight:600;font-size:15px;text-align:center;color:#2E7D32">认知 = 所有表层问题的根。</p>
+<div class="sep"></div>
+<div class="btn-wrap typing-line"><button class="btn pri" onclick="go('p5')">那怎么办？</button></div>
+<div class="sep-xl"></div>
+</div>
+
+<!-- p5 解法 -->
+<div id="p5" class="page bg-glass">
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">解法</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:20px;font-weight:700;text-align:center;line-height:1.3;color:#3D3D3D">解决认知问题</p>
+<p class="typing-line" style="font-size:13px;color:#8A7E72;margin-top:4px;text-align:center">就是解决</p>
+<p class="typing-line" style="font-size:17px;font-weight:600;color:#D4895E;margin-top:2px;text-align:center;line-height:1.4">"我的注意力总被分配给不重要东西"</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:13px;color:#8A7E72;text-align:center;max-width:300px;line-height:1.6">养成认知扩展框架——不是问一次，是定期用大模型做认知审计。</p>
+<div class="sep"></div>
+<div class="card" style="background:linear-gradient(135deg,#D4CBBE,#CDC3B4)" class="typing-line"><p style="font-size:16px;font-weight:700;color:#2E7D32;text-align:center">你的能力决定了下限。你的认知决定了上限。</p></div>
+<div class="sep"></div>
+<div class="btn-wrap"><button class="btn pri typing-line" onclick="go('p6')">给我工具</button></div>
+</div>
+
+<!-- p6 模板 -->
+<div id="p6" class="page bg-warm scroll">
+<div class="sep"></div>
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">你的新武器</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:19px;font-weight:600;text-align:center;color:#3D3D3D">打开任意大模型</p>
+<p class="typing-line" style="font-size:10px;color:#B0A898;text-align:center">DeepSeek · ChatGPT · 豆包 · Kimi</p>
+<div class="sep"></div>
+<div style="background:#fff;border-radius:16px;padding:14px 16px;max-width:340px;width:100%;margin:4px 0;border:1px solid #E8E0D6" class="typing-line">
+<p style="font-size:10px;color:#B0A898;letter-spacing:1px;margin-bottom:4px">模板1 — 看见你错过的</p>
+<p style="font-size:13px;color:#3D3D3D;line-height:1.7;font-family:monospace">"我每天花[X]小时刷手机。如果把这时间压缩一半，我可以做成哪一件对别人真正有用的事？给我一个本周就能启动的具体方案。"</p>
+</div>
+<div class="sep"></div>
+<div style="background:#fff;border-radius:16px;padding:14px 16px;max-width:340px;width:100%;margin:4px 0;border:1px solid #E8E0D6" class="typing-line">
+<p style="font-size:10px;color:#B0A898;letter-spacing:1px;margin-bottom:4px">模板2 — 用AI缩短你做事的时间</p>
+<p style="font-size:13px;color:#3D3D3D;line-height:1.7;font-family:monospace">"我是一个[你的身份/岗位]，正在做[具体工作]。列出3个可以借助AI把时间缩短到1/10的环节，并给出操作指令。"</p>
+</div>
+<div class="sep"></div>
+<div style="background:#fff;border-radius:16px;padding:14px 16px;max-width:340px;width:100%;margin:4px 0;border:1px solid #E8E0D6" class="typing-line">
+<p style="font-size:10px;color:#B0A898;letter-spacing:1px;margin-bottom:4px">模板3 — 找到你的价值杠杆</p>
+<p style="font-size:13px;color:#3D3D3D;line-height:1.7;font-family:monospace">"根据我的背景[简述]，有哪些'对他人有价值'的事是我现在就能做的？要求门槛极低、杠杆极高、能用前沿工具放大影响。"</p>
+</div>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:12px;color:#B0A898;text-align:center;max-width:300px">你不需要成为专家。你只需要开始问对的问题。</p>
+<div class="sep"></div>
+<div class="btn-wrap typing-line"><button class="btn pri" onclick="go('p7')">接种完成</button></div>
+<div class="sep-xl"></div>
+</div>
+
+<!-- p7 接种完成 -->
+<div id="p7" class="page bg-warm scroll">
+<div class="sep"></div>
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">接种完成</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:28px;font-weight:800;color:#2E7D32;text-align:center;line-height:1.2">你的认知疫苗<br>接种完成</p>
+<div class="sep-sm"></div>
+
+<div style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border-radius:16px;padding:16px 18px;max-width:340px;width:100%;margin:6px 0;text-align:center" class="typing-line">
+<p style="font-size:14px;font-weight:700;color:#1B5E20;line-height:1.5">🧬 这只是第一针</p>
+<p style="font-size:12px;color:#33691E;line-height:1.6;margin-top:4px">认知疫苗的第一针已经接种完成。<br><strong>后续的加强针，在你自己的手里。</strong><br><br>觉醒只是第一步。<br>真正改变你人生的，是每一次你选择「看见更多」的日常行动。</p>
+</div>
+
+<div class="sep-sm"></div>
+<div style="background:#fff;border-radius:20px;padding:22px 18px;max-width:340px;width:100%;margin:6px 0;box-shadow:0 3px 12px rgba(0,0,0,.04);text-align:center" class="typing-line">
+<div id="typeCode" style="font-size:32px;font-weight:800;letter-spacing:6px;color:#2E7D32">C-E-E</div>
+<div id="typeName" style="font-size:16px;font-weight:700;color:#3D3D3D;margin-top:2px">认知扩展者</div>
+<div id="typeDesc" style="font-size:13px;color:#8A7E72;margin-top:6px">你选择看见算法如何塑造你，然后选择了看见更多。但这不是终点——这是你认知升级的起点。</div>
+<div id="typeBadge" style="display:inline-flex;align-items:center;gap:6px;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:600;background:linear-gradient(135deg,#E8F5E9,#C8E6C9);color:#1B5E20;margin-top:8px">🧠 第 1,248 位接种者</div>
+</div>
+<div class="sep-sm"></div>
+<div id="extraTags" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:320px;margin:4px auto"></div>
+
+<div style="background:#fff;border-radius:16px;padding:16px 18px;max-width:340px;width:100%;margin:6px 0;border:1px solid #E8E0D6" class="typing-line">
+<p style="font-size:13px;font-weight:700;color:#2E7D32;text-align:center">📈 你的认知成长路径</p>
+<div style="font-size:12px;color:#5D5A55;line-height:1.8;margin-top:6px;text-align:left">
+<strong style="color:#D4895E">第一层觉醒 ✅ 已触发</strong> — 你看到了算法如何操控你的注意力<br>
+<strong style="color:#B0A898">第二层觉醒 ⏳ 等待激活</strong> — 你开始质疑"我应该关注什么"<br>
+<strong style="color:#B0A898">第三层觉醒 🔮 在你手中</strong> — 你每天的选择，决定你成为谁
+</div>
+</div>
+
+<div class="sep"></div>
+<p class="typing-line" style="font-size:14px;color:#5D5A55;text-align:center;line-height:1.8;max-width:320px">不是让你放下手里的活。是让你在做手里的活时，<strong style="color:#2E7D32">多一张更大的地图</strong>。</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:13px;color:#8A7E72;text-align:center;max-width:300px">给每一个觉得工作没有意义感的人——你不是走错了路，<strong style="color:#2E7D32">你只是还没有看到更大的地图</strong>。</p>
+<div class="sep"></div>
+<div class="share-card typing-line" onclick="copyText()">
+<span class="badge">🧠</span>
+<span class="tagline">我已接种认知疫苗</span>
+<span class="desc" id="shareDesc">30秒实验 · 看见算法如何塑造我</span>
+<div class="share-tags" id="shareTags" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px auto;max-width:320px"></div>
+<span class="hint">📋 点击复制分享文字</span>
+</div>
+<div class="sep"></div>
+<div class="card line typing-line" onclick="go('p8')"><p style="font-size:13px;font-weight:600;color:#2E7D32">📖 阅读作者的话</p><p style="font-size:11px;color:#8A7E72;margin-top:3px">这个项目为什么存在？关于三层觉醒。</p></div>
+<div class="sep"></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin:8px 0;width:100%;max-width:340px" class="typing-line">
+<p style="font-size:11px;color:#B0A898">你已经完成了 5 分钟的认知接种</p>
+<button class="btn pri" style="max-width:240px" onclick="copyText()">📋 分享给一个人</button>
+<button class="btn ghost" style="max-width:240px" onclick="restartAll()">重新体验</button>
+</div>
+<div class="sep-xl"></div>
+</div>
+
+<!-- p8 作者的话 -->
+<div id="p8" class="page bg-warm scroll">
+<div class="sep"></div>
+<p class="typing-line" style="font-size:10px;color:#B0A898;letter-spacing:2px;text-align:center">作者的话</p>
+<div class="sep"></div>
+<p class="typing-line" style="font-size:24px;font-weight:700;text-align:center;line-height:1.3;color:#3D3D3D">三层觉醒</p>
+<div class="sep-sm"></div>
+<p class="typing-line" style="font-size:14px;color:#8A7E72;text-align:center;max-width:300px;line-height:1.6">为什么有些人能放下手机，但还是感觉缺了点什么？</p>
+<div class="sep-sm"></div>
+
+<div style="background:#fff;border-radius:22px;padding:24px 20px;max-width:400px;width:100%;margin:8px 0;box-shadow:0 4px 20px rgba(0,0,0,.04)">
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+<strong style="color:#3D3D3D;font-size:15px">这个项目，诞生于一个问题。</strong><br><br>
+不是"怎么让人少刷手机"。是"为什么即使放下了手机，大多数人还是在解决自己能看见的问题，而不是最重要的问题？"
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+我是一个理科生。每天泡在专业上深度学习让我有成就感。但后来我发现一个悖论：<strong>我越专注自己领域的深度，我越看不见领域之外正在发生的、真正影响我的事。</strong>
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+这让我想到一个更大的问题——<br><br>
+<strong style="color:#3D3D3D;font-size:16px">觉醒的三个层次。</strong>
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+<em style="color:#5B8C5A;font-size:14px">第一层：目标觉醒。</em>你有变好的欲望。你不想再这样下去了。这是觉醒的起点，很多人都在这里。<br><br>
+<em style="color:#5B8C5A;font-size:14px">第二层：方法觉醒。</em>你知道怎么做。你能放下手机，你有学习框架，你能执行。做到这一步的人，已经超过了绝大多数人。他们被称作自律的、优秀的、高杠杆的人。<br><br>
+<em style="color:#5B8C5A;font-size:14px">第三层：价值觉醒。</em>你知道为谁而做。
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+<strong>这是最少人抵达的一层。</strong>不是因为最难——是因为最不"紧急"。<br><br>
+目标觉醒让你想变好。方法觉醒让你能变好。但这两层都指向向内——"我怎么样"、"我的成就"、"我的未来"。<br><br>
+价值觉醒指向向外——<strong style="color:#5B8C5A;font-size:15px">我能为别人创造什么价值？</strong>
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+不是说向内不好。是当所有人都只向内看的时候，真正值得被解决的问题——远方的、宏大的、跨越个体边界的问题——没有被看见。<br><br>
+我看到很多优秀的年轻人。他们有目标、有方法、有执行力。但他们做的事，始终围绕"我怎么更成功"。这不是他们的错——<strong>他们只是不知道还有第三个觉醒的方向。</strong>
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+价值驱动不是"我要报效祖国"这种宏大但模糊的口号。它是：<em>我看到一个问题，我有能力用我的方式解决它，我选择这样做，因为这对他人有价值。</em>
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+这就是这个项目存在的原因。<br><br>
+我不是一个"觉醒的人"。我只是比你早一点看到了这个结构。然后我选择用我所有的自由时间，去解决我认为最值得解决的问题——用前沿工具，做出能指数级传播的东西，帮别人看到他们本来看不到的地图。
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left;margin-bottom:8px">
+<strong>这个选择不是牺牲。</strong>它是我找到的，比我个人的学术成就、比我被社会赞扬，更能让我感到"我在做正确的事"的事。
+</p>
+
+<p class="typing-line" style="font-size:13.5px;line-height:2.1;color:#5D5A55;text-align:left">
+你不需要成为伟人才能开始。你只需要把这条信息转给你认为需要的人。<br><br>
+每一个被点燃的人，都是一个节点。每一个节点的传播，都是这个指数级反应的一部分。<br><br>
+<strong style="color:#5B8C5A;font-size:15px">如果你也被触动了——转给一个人。就一个人。</strong>
+</p>
+</div>
+
+<div class="sep"></div>
+<div class="btn-wrap"><button class="btn pri typing-line" onclick="go('p7'); markReadAuthor()">🔙 回到接种完成</button></div>
+<div class="sep-xl"></div>
+</div>
+
+<script>
+/* ===== 配置 ===== */
+var PAGE_IDS = ["p0","p0a","p0b","p0c","p0d","p1","p2","p3","p4","p5","p6","p7","p8"];
+
+var userPath = 'p0';
+var exploredTiers = false;
+var readAuthor = false;
+var completedExperiment = false;
+var restartCount = 0;
+var timer = null;
+
+document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(function() { animatePage("p0"); }, 100);
+});
+
+/* ===== 页面跳转 ===== */
+function go(targetId) {
+    var prevPage = document.querySelector(".page.active");
+    if (prevPage) {
+        prevPage.querySelectorAll('.typing-line.in, .tier.in').forEach(function(el) { el.classList.remove('in'); });
+        var prevId = prevPage.id;
+        if (prevId === 'p0a' || prevId === 'p0b' || prevId === 'p0c') userPath = prevId;
+    }
+    document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
+    var targetElement = document.getElementById(targetId);
+    if (targetElement) {
+        targetElement.classList.add("active");
+        if (targetId === 'p7') updateMbtiCard();
+        if (targetId === 'p3') {
+            // 三层结构页：使用独立的快速动画
+            setTimeout(function() { animateTierPage(); }, 50);
+            updateProgress();
+            window.scrollTo(0, 0);
+            document.getElementById("stepLabel").textContent = getStepLabel(targetId);
+            return;
+        }
+    } else { console.error('页面ID不存在:', targetId); return; }
+    updateProgress();
+    window.scrollTo(0, 0);
+    var stepLabel = document.getElementById("stepLabel");
+    if (stepLabel) stepLabel.textContent = getStepLabel(targetId);
+    setTimeout(function() { animatePage(targetId); }, 60);
+}
+
+/* ===== 通用文字动画 ===== */
+function animatePage(pageId) {
+    var page = document.getElementById(pageId);
+    if (!page) return;
+    var items = Array.from(page.querySelectorAll(".typing-line"));
+    items.forEach(function(el, index) {
+        var textLen = el.textContent.length;
+        var delay = 280 + (textLen > 15 ? (textLen - 15) * 10 : 0);
+        setTimeout(function() { el.classList.add("in"); }, index * delay);
+    });
+}
+
+/* ===== 三层结构专用快速动画 ===== */
+function animateTierPage() {
+    var page = document.getElementById("p3");
+    if (!page) return;
+    
+    // 标题和描述：快速出现（已经通过 CSS transition-delay 控制）
+    var fastItems = page.querySelectorAll(".typing-line.fast");
+    fastItems.forEach(function(el) {
+        setTimeout(function() { el.classList.add("in"); }, 50);
+    });
+    
+    // 三个卡片：逐层出现
+    var tier1 = document.getElementById("tier1");
+    var tier2 = document.getElementById("tier2");
+    var tier3 = document.getElementById("tier3");
+    
+    // 第一层：0.4秒
+    setTimeout(function() { if(tier1) tier1.classList.add("in"); }, 400);
+    // 第二层：0.8秒
+    setTimeout(function() { if(tier2) tier2.classList.add("in"); }, 800);
+    // 第三层：1.2秒
+    setTimeout(function() { if(tier3) tier3.classList.add("in"); }, 1200);
+    
+    // 总结卡片和按钮：1.5秒后
+    var bottomItems = page.querySelectorAll(".typing-line:not(.fast)");
+    bottomItems.forEach(function(el, index) {
+        setTimeout(function() { el.classList.add("in"); }, 1500 + index * 200);
+    });
+}
+
+/* ===== 三层卡片展开 ===== */
+function toggleTier(element) {
+    var isExpanded = element.classList.contains('expanded');
+    document.querySelectorAll('.tier.expanded').forEach(function(t) { t.classList.remove('expanded'); });
+    if (!isExpanded) {
+        element.classList.add('expanded');
+        // 展开后触发内部typing-line动画
+        var innerLines = element.querySelectorAll('.typing-line');
+        innerLines.forEach(function(el, i) {
+            setTimeout(function() { el.classList.add("in"); }, i * 200);
+        });
+    }
+}
+
+function markExplored() { exploredTiers = true; }
+function markReadAuthor() { readAuthor = true; }
+
+function getStepLabel(pageId) {
+    var m = { p0:"1/5", p0a:"1/5", p0b:"1/5", p0c:"1/5", p0d:"1/5", p1:"2/5 — 实验", p2:"3/5 — 觉察", p3:"4/5 — 揭露", p4:"4/5", p5:"5/5 — 解法", p6:"5/5", p7:"✓ 接种完成", p8:"📖" };
+    return m[pageId] || "";
+}
+
+function updateProgress() {
+    var currentIndex = 0;
+    for (var i = 0; i < PAGE_IDS.length; i++) {
+        var el = document.getElementById(PAGE_IDS[i]);
+        if (el && el.classList.contains("active")) { currentIndex = i + 1; break; }
+    }
+    var p = document.getElementById("pf");
+    if (p) p.style.width = Math.round(currentIndex / PAGE_IDS.length * 100) + "%";
+}
+
+function updateMbtiCard() {
+    var baseTag = "C-E-E", baseName = "认知扩展者", baseDesc = "你选择了看见更多。";
+    if (userPath === 'p0b') { baseTag = "C-D-E"; baseName = "认知防御者"; baseDesc = "你已经有重要的事要做。但更大的地图在圈子之外。"; }
+    else if (userPath === 'p0c') { baseTag = "C-S-E"; baseName = "认知怀疑者"; baseDesc = "你带着怀疑走进来，然后选择了30秒的实验。"; }
+    var tags = [];
+    if (completedExperiment) tags.push("⏱️ 实验完成者");
+    if (exploredTiers) tags.push("🧬 三层洞察者");
+    if (readAuthor) tags.push("💎 价值觉醒者");
+    if (restartCount > 0) tags.push("🔄 深度体验者");
+    if (tags.length === 0) { tags.push("🌱 觉察者"); tags.push("🛡️ 已接种"); }
+    document.getElementById("typeCode").textContent = baseTag;
+    document.getElementById("typeName").textContent = baseName;
+    document.getElementById("typeDesc").textContent = baseDesc;
+    document.getElementById("typeBadge").textContent = "🧠 第 " + (3500 + Math.floor(Math.random() * 500)).toLocaleString() + " 位接种者";
+    document.getElementById("extraTags").innerHTML = tags.map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
+    document.getElementById("shareDesc").textContent = "30秒实验 · 看见算法如何塑造我\n—— 然后我选择了看见更多";
+    document.getElementById("shareTags").innerHTML = tags.slice(0,3).map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
+}
+
+function startTimer(nextPage) {
+    if (timer) return;
+    var btn = document.getElementById("tb");
+    if (btn) { btn.disabled = true; btn.textContent = "进行中..."; }
+    var tt = document.getElementById("tt"), tp = document.getElementById("tp"), ts = document.getElementById("ts"), ts2 = document.getElementById("ts2");
+    if (ts2) ts2.style.display = "block";
+    var count = 30;
+    tt.textContent = count;
+    tp.style.strokeDashoffset = "376.99";
+    var step = 376.99 / 30;
+    timer = setInterval(function() {
+        count--;
+        tt.textContent = count < 10 ? "0" + count : count;
+        tp.style.strokeDashoffset = Math.max(0, 376.99 - (30 - count) * step);
+        if (count <= 0) {
+            clearInterval(timer); timer = null;
+            tp.style.strokeDashoffset = "0";
+            tt.style.fontSize = "22px"; tt.textContent = "✓";
+            if (ts) ts.textContent = "时间到。你感觉到了什么？";
+            if (ts2) ts2.style.display = "none";
+            completedExperiment = true;
+            setTimeout(function() { go(nextPage); if (btn) { btn.disabled = false; btn.textContent = "重新实验"; } }, 800);
+        }
+    }, 1000);
+}
+
+function restartAll() {
+    if (timer) { clearInterval(timer); timer = null; }
+    document.querySelectorAll('.typing-line.in, .tier.in').forEach(function(el) { el.classList.remove('in'); });
+    userPath = 'p0'; exploredTiers = false; readAuthor = false; completedExperiment = false;
+    restartCount++;
+    go("p0");
+}
+
+async function copyText() {
+    var tc = document.getElementById("typeCode") ? document.getElementById("typeCode").textContent : "C-E-E";
+    var tn = document.getElementById("typeName") ? document.getElementById("typeName").textContent : "认知扩展者";
+    var txt = "🧠 我刚刚完成了一次认知疫苗接种\n\n我只是完成了第一针。觉醒是第一步，真正的改变在每一天的选择里。我的标签：" + tc + " · " + tn + "\n\n👉 你也来试试：" + window.location.href;
+    try {
+        if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(txt); showToast("✅ 已复制到剪贴板！"); return; }
+    } catch(e) {}
+    try {
+        var ta = document.createElement("textarea");
+        ta.value = txt; ta.style.position = "fixed"; ta.style.left = "-9999px"; ta.style.top = "-9999px"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand("copy");
+        document.body.removeChild(ta); showToast("✅ 已复制到剪贴板！");
+    } catch(e) { showToast("⚠️ 复制失败，请手动复制"); }
+}
+
+function showToast(msg) {
+    var t = document.getElementById("toast");
+    if (!t) return;
+    t.textContent = msg; t.classList.add("show");
+    setTimeout(function() { t.classList.remove("show"); }, 2500);
+}
+</script>
+</body>
+</html>
